@@ -7,7 +7,7 @@ dotenv.config();
 
 const init = async () => {
   // Initialize Zomma instance
-  const zomma = Zomma({
+  const zomma = new Zomma({
     privateKey: process.env.PRIVATE_KEY,
     network: "testnet",
   });

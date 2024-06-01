@@ -7,7 +7,7 @@ dotenv.config();
 
 const init = async () => {
   // Initialize Zomma instance
-  const zomma = Zomma({
+  const zomma = new Zomma({
     privateKey: process.env.PRIVATE_KEY,
     network: "testnet",
   });
@@ -42,8 +42,8 @@ const init = async () => {
   // console.log(tradeResponse7);
 
   // Sell 6/28 BTC-USDC 65000 put 0.03 size with slippage 0.5%
-  // const tradeResponse8 = await zomma.sell("BTC-USDC", 1719561600, "65000", 0, "0.03", 0.5);
-  // console.log(tradeResponse8);
+  const tradeResponse8 = await zomma.sell("BTC-USDC", 1719561600, "65000", 0, "0.015", 0.5);
+  console.log(tradeResponse8);
 }
 
 

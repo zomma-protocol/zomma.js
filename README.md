@@ -25,7 +25,7 @@ import Zomma from 'zomma-api';
 Before you can start using the library, you need to initialize a Zomma instance with your private key and the desired network (mainnet or testnet):
 
 ```javascript
-const zomma = Zomma({
+const zomma = new Zomma({
   privateKey: 'YOUR_PRIVATE_KEY',
   network: 'mainnet', // or 'testnet' for the test network
 });

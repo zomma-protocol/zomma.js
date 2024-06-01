@@ -1,10 +1,15 @@
 {
   "name": "zomma.js",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "type": "module",
   "description": "Zomma Option API client library for trading.",
-  "main": "src/zomma.js",
+  "main": "lib/zomma.js",
+  "files": [
+    "lib"
+  ],
   "scripts": {
+    "build": "babel src --out-dir lib",
+    "prepublish": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -20,5 +25,9 @@
     "ethers": "^6.12.1",
     "zksync-ethers": "^6.7.1"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "@babel/cli": "^7.21.5",
+    "@babel/core": "^7.21.5",
+    "@babel/preset-env": "^7.21.5"
+  }
 }
