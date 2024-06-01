@@ -1,5 +1,5 @@
 {
-  "name": "zomma.js",
+  "name": "zomma-api",
   "version": "1.0.8",
   "type": "module",
   "description": "Zomma Option API client library for trading.",
