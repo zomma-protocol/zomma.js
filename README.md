@@ -7,7 +7,7 @@ The Zomma Option API is a client library for trading options on the Zomma platfo
 To install the Zomma Option API library, use the following command:
 
 ```bash
-npm install zomma-api
+npm install zomma.js
 ```
 
 ## Usage
@@ -17,7 +17,7 @@ npm install zomma-api
 To use the Zomma Option API library in your project, you need to import it first:
 
 ```javascript
-import Zomma from 'zomma-api';
+import Zomma from 'zomma.js';
 ```
 
 ### Initializing the Zomma Instance
