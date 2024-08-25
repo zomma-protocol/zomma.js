@@ -35,6 +35,21 @@ export default class Zomma extends Base {
   }
 
   /**
+   * Retrieves the pool information for a specified market.
+   * @param {Object} market - The market object.
+   * @returns {Promise<Array>} - An array of pool information.
+   */
+  async getPools(market) {
+    try {
+      const response = await axios.get(`${this.apiEndpoint}api/main/v1/markets/${market.name}/pools`);
+      return response.data.pools;
+    } catch (error) {
+      console.error(`Failed to retrieve pool information: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
    * Retrieves the account balance.
    * @returns {Promise<BigInt>} - The account balance.
    */
@@ -84,6 +99,20 @@ export default class Zomma extends Base {
    */
   async getPremium(market, expiry, strike, isCall, size) {
     const signedData = await this.signedData(market.name);
+
+    const pools = await this.getPools(market);
+    const poolInfo = await this.getPoolInfo(market, pools[0].address);
+
+    const reservedRate = BigInt(pools[0].reserved_rate);
+    const reservedRateRatio = 1000000000000000000n - reservedRate; // 1 - reserved_rate
+    const usedMargin = poolInfo[0].marginBalance - poolInfo[0].available;
+    const reservedMargin = (poolInfo[0].marginBalance * reservedRateRatio) / 1000000000000000000n;
+    const utilization = (usedMargin * 10000n) / reservedMargin;
+    
+    if (utilization > 9900n) {
+      return [0n, 0n];
+    }
+
     return await this.callWithData(
       market.vaultContract,
       "getPremium",

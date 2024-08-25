@@ -120,6 +120,16 @@ export default class Base {
     );
   }
 
+  async getPoolInfo(market, vaultAddress) {
+    const signedData = await this.signedData(market.name);
+    return await this.callWithData(
+      market.vaultContract,
+      "getAccountInfo",
+      [vaultAddress],
+      signedData
+    );
+  }
+
   async signData(
     market,
     expiry,
