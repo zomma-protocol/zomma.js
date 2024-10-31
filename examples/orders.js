@@ -8,7 +8,7 @@ const init = async () => {
   // Initialize Zomma instance
   const zomma = new Zomma({
     privateKey: process.env.PRIVATE_KEY,
-    network: "testnet",
+    network: "mainnet",
   });
   await zomma.initialize();
 

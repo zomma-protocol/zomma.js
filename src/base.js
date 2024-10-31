@@ -9,12 +9,12 @@ dotenv.config();
 
 const networkConfig = {
   mainnet: {
-    providerUrl: "https://mainnet.era.zksync.io",
-    ethProviderNetwork: 1,
-    usdcContractAddress: "0x3355df6d4c9c3035724fd0e3914de96a5a83aaf4",
-    apiEndpoint: "https://api-v1.zomma.pro/",
-    btcVerifierAddress: "0xAE8030005247a0608Ab905b5a625BE4120856ddF",
-    ethVerifierAddress: "0x55704072E6995150644A997Ef9E1B3d88b06ac1A",
+    providerUrl: "https://arb1.arbitrum.io/rpc",
+    ethProviderNetwork: 42161,
+    usdcContractAddress: "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+    apiEndpoint: "https://arb-api.zomma.pro/",
+    btcVerifierAddress: "0x275376e25e068c894d0df5cc9a3d1893d94e9f4a",
+    ethVerifierAddress: "0xa9deb981b735ec0525c8d4c959267429fdd82347",
   },
   testnet: {
     providerUrl: "https://sepolia.era.zksync.dev",
