@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Zomma Browser Demo</title>
+</head>
+
+<body>
+  <button id="connectWallet">Connect Wallet</button>
+  <button id="btc">BTC</button>
+  <button id="eth">ETH</button>
+  <button id="buyCall">Buy Call</button>
+  <button id="sellCall">Sell Call</button>
+  <button id="buyPut">Buy Put</button>
+  <button id="sellPut">Sell Put</button>
+  <div id="accountInfo"></div>
+
+  <script type="module">
+    import { ethers } from 'ethers';
+    import Zomma from './lib/zomma.js';
+
+    let zomma;
+
+    async function init(signer) {
+      try {
+        zomma = new Zomma({
+          signer: signer,
+          network: "testnet",
+        });
+        await zomma.initialize();
+
+        // fetch markets
+        const markets = await zomma.getMarkets();
+        console.log("Markets:", markets);
+
+        for (const market of markets) {
+          console.log(market);
+
+          // fetch account info
+          const accountInfo = await zomma.getAccountInfo(
+            market,
+            zomma.wallet.address
+          );
+          
+          document.getElementById('accountInfo').innerHTML += `
+            <p>market: ${market.name}</p>
+            <p>address: ${zomma.wallet.address}</p>
+            <p>initialMargin: ${ethers.formatEther(accountInfo[0].initialMargin)}</p>
+            <p>marginBalance: ${ethers.formatEther(accountInfo[0].marginBalance)}</p>
+            <p>equity: ${ethers.formatEther(accountInfo[0].equity)}</p>
+          `;
+        }
+      } catch (err) {
+        console.error("init error:", err);
+      }
+    }
+
+    document.getElementById('btc').onclick = async () => {
+      console.log('btc');
+      let orders = await zomma.getOrders("BTC-USDC");
+      console.log(orders);
+    };
+
+    document.getElementById('buyCall').onclick = async () => {
+      console.log('trade');
+      // Buy 11/29 BTC-USDC 62000 call 0.02 size with slippage 1%
+      const tradeResponse6 = await zomma.buy("BTC-USDC", 1732867200, "100000", 1, "0.01", 1.0);
+      console.log(tradeResponse6);
+    };
+
+    document.getElementById('sellCall').onclick = async () => {
+      console.log('sellCall');
+      // Sell 11/29 BTC-USDC 62000 call 0.02 size with slippage 0.5%
+      const tradeResponse6 = await zomma.sell("BTC-USDC", 1732867200, "96000", 1, "0.01", 0.5);
+      console.log(tradeResponse6);
+    };
+
+    document.getElementById('buyPut').onclick = async () => {
+      console.log('buyPut');
+      // Buy 11/22 BTC-USDC 80000 put 0.05 size with slippage 1%
+      const tradeResponse6 = await zomma.buy("BTC-USDC", 1732262400, "80000", 0, "0.05", 1.0);
+      console.log(tradeResponse6);
+    };
+
+    document.getElementById('sellPut').onclick = async () => {
+      console.log('sellPut');
+      // Sell 11/22 BTC-USDC 82000 put 0.1 size with slippage 1%
+      const tradeResponse6 = await zomma.sell("BTC-USDC", 1732262400, "82000", 0, "0.1", 1.0);
+      console.log(tradeResponse6);
+    };
+
+
+    document.getElementById('connectWallet').onclick = async () => {
+      try {
+        if (typeof window.ethereum === 'undefined') {
+          alert('install MetaMask!');
+          return;
+        }
+
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const signer = await provider.getSigner();
+        await init(signer);
+      } catch (err) {
+        console.error("connect wallet error:", err);
+      }
+    };
+  </script>
+</body>
+
+</html>

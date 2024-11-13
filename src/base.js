@@ -3,9 +3,6 @@ import { ethers } from "ethers";
 import axios from "axios";
 import VaultAbi from "./abi/vault.js";
 import Erc20Abi from "./abi/erc20.js";
-import * as dotenv from "dotenv";
-
-dotenv.config();
 
 const networkConfig = {
   mainnet: {
@@ -17,12 +14,12 @@ const networkConfig = {
     ethVerifierAddress: "0xa9deb981b735ec0525c8d4c959267429fdd82347",
   },
   testnet: {
-    providerUrl: "https://sepolia.era.zksync.dev",
+    providerUrl: "https://sepolia-rollup.arbitrum.io/rpc",
     ethProviderNetwork: "sepolia",
-    usdcContractAddress: "0x7dC1d7F6A9d03e0764b4935824410cCF709BF9DB",
+    usdcContractAddress: "0x9e0c895a578e1f73f01679ae5e1b51c8a4244a74",
     apiEndpoint: "https://zomma-api.joyso.io/",
-    btcVerifierAddress: "0xa78eE98aBfEA370Cd6891457A754F1143b272495",
-    ethVerifierAddress: "0xBB6d9E4e380d6dbF042d3B6C3b269Bd9B5337679",
+    btcVerifierAddress: "0x4e0c50793eceda34cf15247a6beeec18faa67a7e",
+    ethVerifierAddress: "0x8f9f93d63cb5bb874e7e65a4ccfb1cedfddcea81",
   },
 };
 

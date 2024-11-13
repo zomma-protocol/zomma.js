@@ -12,11 +12,18 @@ export default class Zomma extends Base {
    */
   constructor(options) {
     super(options);
-    this.wallet = new Wallet(
-      options.privateKey,
-      this.provider,
-      this.ethProvider
-    );
+    if (options.signer) {
+      // pass signer instance
+      this.wallet = options.signer;
+    } else if (options.provider && options.provider.provider.isMetaMask) {
+      // browser environment, use MetaMask
+      this.wallet = options.provider.getSigner();
+    } else if (options.privateKey) {
+      // Node.js environment, use private key
+      this.wallet = new Wallet(options.privateKey, this.provider);
+    } else {
+      throw new Error("Neither signer nor provider nor privateKey provided");
+    }
   }
 
   /**
@@ -233,11 +240,16 @@ export default class Zomma extends Base {
     const premium = quote[0];
     const fee = quote[1];
 
-    const slippageBigInt = BigInt(Math.floor(slippage * 1000));
+    console.log(`premium: ${premium}, fee: ${fee}`);
+
+    const slippageBigInt = BigInt(Math.floor(slippage * 10));
 
     // let acceptTotal = abs((premium * 1005n) / 1000n + fee);
     let acceptTotal = abs((premium * (1000n + slippageBigInt)) / 1000n + fee);
+    console.log(`slippageBigInt: ${slippageBigInt}`);
     const deadline = Math.floor(Date.now() / 1000) + 120;
+
+    console.log(`premium: ${premium}, fee: ${fee}, slippage: ${slippage}, acceptTotal: ${acceptTotal}`);
 
     const gasResponse = await this.getGasFee(
       market,
@@ -264,6 +276,8 @@ export default class Zomma extends Base {
       gas,
       deadline
     );
+
+    console.log(`gas: ${gas}, deadline: ${deadline}`);
 
     const tradeResponse = await this.trade(
       market,
@@ -305,10 +319,15 @@ export default class Zomma extends Base {
     const premium = quote[0];
     const fee = quote[1];
 
-    const slippageBigInt = BigInt(Math.floor(slippage * 1000));
+    console.log(`premium: ${premium}, fee: ${fee}`);
+
+    const slippageBigInt = BigInt(Math.floor(slippage * 10));
     // let acceptTotal = abs((premium * 995n) / 1000n + fee);
     let acceptTotal = abs((premium * (1000n - slippageBigInt)) / 1000n + fee);
+    console.log(`slippageBigInt: ${slippageBigInt}`);
     const deadline = Math.floor(Date.now() / 1000) + 120;
+
+    console.log(`premium: ${premium}, fee: ${fee}, slippage: ${slippage}, acceptTotal: ${acceptTotal}`);
 
     const gasResponse = await this.getGasFee(
       market,
@@ -324,6 +343,7 @@ export default class Zomma extends Base {
     const gas = BigInt(gasResponse.gas);
 
     const nonce = await this.getNonce(market, this.wallet.address);
+    
     const signedData = await this.signData(
       market,
       expiry,
@@ -335,6 +355,8 @@ export default class Zomma extends Base {
       gas,
       deadline
     );
+
+    console.log(`gas: ${gas}, deadline: ${deadline}`);
 
     const tradeResponse = await this.trade(
       market,

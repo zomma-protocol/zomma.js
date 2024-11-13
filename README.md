@@ -20,9 +20,12 @@ To use the Zomma Option API library in your project, you need to import it first
 import Zomma from 'zomma.js';
 ```
 
+
 ### Initializing the Zomma Instance
 
-Before you can start using the library, you need to initialize a Zomma instance with your private key and the desired network (mainnet or testnet):
+There are two ways to initialize the Zomma instance:
+
+#### 1. Using Private Key (Node.js Environment)
 
 ```javascript
 const zomma = new Zomma({
@@ -32,6 +35,19 @@ const zomma = new Zomma({
 
 await zomma.initialize();
 ```
+
+#### 2. Using Web3 Provider (Browser Environment)
+
+```javascript
+const provider = new ethers.BrowserProvider(window.ethereum);
+const signer = await provider.getSigner();
+const zomma = new Zomma({
+  signer: signer,
+  network: 'mainnet', // or 'testnet' for the test network
+});
+await zomma.initialize();
+```
+
 
 ### Fetching Market Data
 
@@ -91,6 +107,25 @@ The library includes example scripts demonstrating various usage scenarios. You 
 - `account.js`: Demonstrates how to fetch market data and retrieve account information.
 - `trade.js`: Demonstrates how to place buy and sell orders.
 - `orders.js`: Demonstrates how to retrieve the list of orders for a specific market.
+- `zomma-web`: A browser-based demo showing how to use the library with MetaMask.
+
+### Running the Web Demo
+
+To run the browser-based demo:
+
+```bash
+cd examples/zomma-web
+yarn
+yarn dev
+```
+
+This will start a local development server. Open your browser and navigate to the displayed URL (usually http://localhost:5173). Make sure you have MetaMask installed in your browser.
+
+The web demo includes examples of:
+- Connecting to MetaMask
+- Fetching market data
+- Retrieving account information
+- Placing buy/sell orders for both calls and puts
 
 ## Documentation
 
