@@ -1,6 +1,6 @@
 {
   "name": "zomma.js",
-  "version": "1.0.13",
+  "version": "1.0.15",
   "type": "module",
   "description": "Zomma Option API client library for trading.",
   "main": "lib/zomma.js",
