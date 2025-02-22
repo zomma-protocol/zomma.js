@@ -14,6 +14,7 @@
   <button id="sellCall">Sell Call</button>
   <button id="buyPut">Buy Put</button>
   <button id="sellPut">Sell Put</button>
+  <button id="prices">Prices</button>
   <div id="accountInfo"></div>
 
   <script type="module">
@@ -26,7 +27,7 @@
       try {
         zomma = new Zomma({
           signer: signer,
-          network: "testnet",
+          network: "mainnet",
         });
         await zomma.initialize();
 
@@ -90,6 +91,12 @@
       console.log(tradeResponse6);
     };
 
+    document.getElementById('prices').onclick = async () => {
+      console.log('prices');
+      const markets = await zomma.getMarkets();
+      const prices = await zomma.getPrices(markets[1]);
+      console.log(prices);
+    };
 
     document.getElementById('connectWallet').onclick = async () => {
       try {

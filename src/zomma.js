@@ -4,6 +4,8 @@ import axios from "axios";
 import { ethers } from "ethers";
 import Base from "./base.js";
 import { abs } from "./helper.js";
+import { OptionPricer } from "./option_pricer.js";
+import BigNumber from "bignumber.js";
 
 export default class Zomma extends Base {
   /**
@@ -12,6 +14,7 @@ export default class Zomma extends Base {
    */
   constructor(options) {
     super(options);
+    this.optionPricer = new OptionPricer();
     if (options.signer) {
       // pass signer instance
       this.wallet = options.signer;
@@ -101,7 +104,7 @@ export default class Zomma extends Base {
    * @returns {Promise<Array>} - The array of expiries.
    */
   async getExpiries(market) {
-    return await getExpiries(market);
+    return await getExpiries(market.name);
   }
 
   /**
@@ -111,7 +114,86 @@ export default class Zomma extends Base {
    * @returns {Promise<Array>} - The array of strikes.
    */
   async getStrikes(market, expiry) {
-    return await getStrikes(market, expiry);
+    return await getStrikes(market.name, expiry.timestamp);
+  }
+
+  /**
+   * Retrieves the prices for a given market.
+   * @param {Object} market - The market object.
+   * @returns {Promise<Array>} - The array of prices.
+   */
+  async getPrices(market) {
+    const expiries = await this.getExpiries(market);
+    const prices = [];
+
+    // only call getPoolConfig once
+    const config = await this.getPoolConfig(market);
+    const spotPriceResp = await axios.get(`${this.apiEndpoint}api/main/v1/markets/${market.name}/oracles/spot_price`);
+    const spotPrice = new BigNumber(spotPriceResp.data.spot_price).div(1e18);
+    // get pools info
+    const pools = await this.getPools(market);
+    const poolInfo = await this.getPoolInfo(market, pools[0].address);
+
+    for (const expiry of expiries) {
+      const strikes = await this.getStrikes(market, expiry);
+      
+      for (const strike of strikes) {
+        prices.push(await this.getLocalPrice(market, expiry, strike, true, true, config, spotPrice, poolInfo));   // buy call
+        prices.push(await this.getLocalPrice(market, expiry, strike, true, false, config, spotPrice, poolInfo));  // sell call
+        prices.push(await this.getLocalPrice(market, expiry, strike, false, true, config, spotPrice, poolInfo));  // buy put
+        prices.push(await this.getLocalPrice(market, expiry, strike, false, false, config, spotPrice, poolInfo)); // sell put
+      }
+    }
+
+    return prices;
+  }
+
+  async getLocalPrice(market, expiry, strike, isCall, isBuy, config, spotPrice, poolInfo) {
+    const strikePrice = strike.price;
+    const iv = new BigNumber(
+      isCall
+        ? isBuy
+          ? strike.buy_call_iv
+          : strike.sell_call_iv
+        : isBuy
+        ? strike.buy_put_iv
+        : strike.sell_put_iv
+    );
+
+    const size = new BigNumber(isBuy ? "1" : "-1").times(1e18);
+    const now = Math.floor(Date.now() / 1000);
+    
+    const available = new BigNumber(poolInfo[0].available.toString());
+    const equity = new BigNumber(poolInfo[0].equity.toString());
+
+    const [price, fee] = this.optionPricer.getPremium({
+      now,
+      spot: spotPrice,
+      riskFreeRate: new BigNumber(config.risk_free_rate),
+      initialMarginRiskRate: new BigNumber(config.initial_margin_risk_rate),
+      iv,
+      expiry: expiry.timestamp,
+      strike: new BigNumber(strikePrice),
+      size,
+      minPremium: new BigNumber(config.min_premium),
+      spotFee: new BigNumber(config.spot_fee),
+      optionFee: new BigNumber(config.option_fee),
+      priceRatio: new BigNumber(config.price_ratio),
+      priceRatio2: new BigNumber(config.price_ratio2),
+      priceRatioUtilization: new BigNumber(config.price_ratio_utilization),
+      available,
+      equity,
+      isCall,
+    });
+
+    return {
+      expiry: expiry.timestamp,
+      strike: strikePrice,
+      isCall,
+      isBuy,
+      price: BigInt(price.multipliedBy(1e18).toFixed(0)),
+      fee: BigInt(fee.multipliedBy(1e18).toFixed(0)),
+    };
   }
 
   /**
@@ -249,7 +331,9 @@ export default class Zomma extends Base {
     console.log(`slippageBigInt: ${slippageBigInt}`);
     const deadline = Math.floor(Date.now() / 1000) + 120;
 
-    console.log(`premium: ${premium}, fee: ${fee}, slippage: ${slippage}, acceptTotal: ${acceptTotal}`);
+    console.log(
+      `premium: ${premium}, fee: ${fee}, slippage: ${slippage}, acceptTotal: ${acceptTotal}`
+    );
 
     const gasResponse = await this.getGasFee(
       market,
@@ -327,7 +411,9 @@ export default class Zomma extends Base {
     console.log(`slippageBigInt: ${slippageBigInt}`);
     const deadline = Math.floor(Date.now() / 1000) + 120;
 
-    console.log(`premium: ${premium}, fee: ${fee}, slippage: ${slippage}, acceptTotal: ${acceptTotal}`);
+    console.log(
+      `premium: ${premium}, fee: ${fee}, slippage: ${slippage}, acceptTotal: ${acceptTotal}`
+    );
 
     const gasResponse = await this.getGasFee(
       market,
@@ -343,7 +429,7 @@ export default class Zomma extends Base {
     const gas = BigInt(gasResponse.gas);
 
     const nonce = await this.getNonce(market, this.wallet.address);
-    
+
     const signedData = await this.signData(
       market,
       expiry,

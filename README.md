@@ -100,6 +100,16 @@ let orders = await zomma.getOrders("BTC-USDC");
 console.log(orders);
 ```
 
+### Fetching Market Prices
+
+You can fetch the prices for a specific market using the `getPrices` method:
+
+```javascript
+const markets = await zomma.getMarkets();
+const prices = await zomma.getPrices(markets[0]);
+console.log(prices);
+```
+
 ## Examples
 
 The library includes example scripts demonstrating various usage scenarios. You can find them in the `examples` directory:

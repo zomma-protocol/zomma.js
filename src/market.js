@@ -2,14 +2,14 @@ import axios from "axios";
 
 const BASE_URL = "https://arb-api.zomma.pro/api/main/v1";
 
-async function getExpiries(market) {
-  const response = await axios.get(`${BASE_URL}/markets/${market}/expiries`);
+async function getExpiries(marketName) {
+  const response = await axios.get(`${BASE_URL}/markets/${marketName}/expiries`);
   return response.data.expiries;
 }
 
-async function getStrikes(market, expiry) {
+async function getStrikes(marketName, expiry) {
   const response = await axios.get(
-    `${BASE_URL}/markets/${market}/expiries/${expiry}/strikes`
+    `${BASE_URL}/markets/${marketName}/expiries/${expiry}/strikes`
   );
   return response.data.strikes;
 }
